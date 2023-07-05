@@ -13,8 +13,7 @@ urmatorul mod doc1.docx, doc2.png, doc3.pdf, doc4.docx....
 import os
 import shutil
 
-
-def list_files_in_folder(path):
+def rename_files_in_folder(path, prefix=None):
     if not os.path.exists(path):
         print("Error: Provided path does not exist.")
         return
@@ -23,23 +22,19 @@ def list_files_in_folder(path):
         print("Error: Provided path is not a folder.")
         return
 
-    files = []
-    for item in os.listdir(path):
-        item_path = os.path.join(path, item)
-        if os.path.isfile(item_path):
-            files.append(item)
+    def list_files_in_folder(path):
+        files = []
+        for item in os.listdir(path):
+            item_path = os.path.join(path, item)
+            if os.path.isfile(item_path):
+                files.append(item)
 
-    return files
+        return files
 
-
-def get_file_creation_time(file_path):
-    return os.path.getctime(file_path)
-
-
-def rename_files_in_folder(path, prefix=None):
     files = list_files_in_folder(path)
-    files.sort(key=get_file_creation_time)
+    files.sort(key=lambda x: os.path.getctime(os.path.join(path, x)))
 
+    sorted_files = []
     for i, file_name in enumerate(files, start=1):
         file_extension = os.path.splitext(file_name)[1]
         new_file_name = str(i)
@@ -49,13 +44,17 @@ def rename_files_in_folder(path, prefix=None):
 
         new_file_name += file_extension
 
-        old_file_path = os.path.join(path, file_name)
+        sorted_files.append((file_name, new_file_name))
+
+    for old_file_name, new_file_name in sorted_files:
+        old_file_path = os.path.join(path, old_file_name)
         new_file_path = os.path.join(path, new_file_name)
 
         shutil.move(old_file_path, new_file_path)
-        print(f"Renamed {file_name} to {new_file_name}")
+        print(f"Renamed {old_file_name} to {new_file_name}")
 
+# Take folder path input from console
+folder_path = input("Enter the path to the folder: ")
 
 # Example usage
-folder_path = "/path/to/folder"
 rename_files_in_folder(folder_path, prefix="doc")
